@@ -9,7 +9,8 @@ export class TelegramStorage extends BaseStorage {
    * @param {Object} config - Telegram配置
    * @param {string} config.botToken - Telegram Bot Token
    * @param {string} config.chatId - Telegram Chat ID (频道或群组ID)
-   * @param {string} [config.proxyUrl] - 可选的代理域名
+   * @param {string} [config.proxyUrl] - 可选的代理域名（用于API请求）
+   * @param {string} [config.customDomain] - 自定义域名（用于展示图片）
    */
   constructor(config) {
     super(config)
@@ -21,7 +22,11 @@ export class TelegramStorage extends BaseStorage {
     // 如果设置了代理域名，使用代理域名，否则使用官方 API
     const apiDomain = this.proxyUrl ? `https://${this.proxyUrl}` : 'https://api.telegram.org'
     this.baseURL = `${apiDomain}/bot${this.botToken}`
-    this.fileDomain = this.proxyUrl ? `https://${this.proxyUrl}` : 'https://api.telegram.org'
+    
+    // 文件访问域名：优先使用自定义域名，其次是代理域名，最后是官方域名
+    this.fileDomain = config.customDomain 
+      ? `https://${config.customDomain}` 
+      : (this.proxyUrl ? `https://${this.proxyUrl}` : 'https://api.telegram.org')
     
     this.defaultHeaders = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -102,8 +107,9 @@ export class TelegramStorage extends BaseStorage {
         throw new Error('Failed to get file path from Telegram')
       }
 
-      // 生成访问 URL
-      const url = `${this.fileDomain}/file/bot${this.botToken}/${filePath}`
+      // 生成访问 URL：使用 file_id 作为路径，不暴露 botToken
+      // 格式: https://custom.domain/file/<file_id>
+      const url = `${this.fileDomain}/file/${fileInfo.file_id}`
       
       // 保存到本地索引
       const index = this._getLocalIndex()
