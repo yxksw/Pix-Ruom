@@ -16,12 +16,7 @@ export const ImageHelper = {
           copyText = `<img src="${url}" alt="${filename}" />`
           break
         default:
-          // 生成预览链接而不是直接下载链接
-          const previewUrl = new URL('/preview', window.location.origin)
-          previewUrl.searchParams.append('url', url)
-          previewUrl.searchParams.append('name', filename)
-          previewUrl.searchParams.append('type', filename.split('.').pop())
-          copyText = previewUrl.toString()
+          copyText = url
       }
       await navigator.clipboard.writeText(copyText)
       ElMessage.success('链接已复制到剪贴板')
