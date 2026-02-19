@@ -26,6 +26,34 @@ export class TelegramStorage extends BaseStorage {
     this.defaultHeaders = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
     }
+    
+    // 本地存储键名
+    this.storageKey = 'telegram_upload_index'
+  }
+  
+  /**
+   * 获取本地文件索引
+   * @private
+   */
+  _getLocalIndex() {
+    try {
+      const data = localStorage.getItem(this.storageKey)
+      return data ? JSON.parse(data) : []
+    } catch {
+      return []
+    }
+  }
+  
+  /**
+   * 保存本地文件索引
+   * @private
+   */
+  _saveLocalIndex(index) {
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(index))
+    } catch (error) {
+      console.error('Failed to save local index:', error)
+    }
   }
 
   /**
@@ -76,6 +104,18 @@ export class TelegramStorage extends BaseStorage {
 
       // 生成访问 URL
       const url = `${this.fileDomain}/file/bot${this.botToken}/${filePath}`
+      
+      // 保存到本地索引
+      const index = this._getLocalIndex()
+      index.push({
+        key,
+        url,
+        fileId: fileInfo.file_id,
+        filePath,
+        lastModified: new Date().toISOString(),
+        size: fileInfo.file_size || 0
+      })
+      this._saveLocalIndex(index)
 
       return { url, key, fileId: fileInfo.file_id, filePath }
     } catch (error) {
@@ -85,26 +125,40 @@ export class TelegramStorage extends BaseStorage {
 
   /**
    * 删除文件
-   * 注意：Telegram Bot API 不支持删除消息中的文件
-   * 这里仅作占位，实际无法删除
+   * 从本地索引中移除（Telegram Bot API 不支持删除消息中的文件）
    * @param {string} key - 文件标识符
    */
   async delete(key) {
     // Telegram Bot API 不支持删除已发送的文件/消息
-    // 需要通过消息 ID 删除消息，但存储的 key 可能不是消息 ID
-    console.warn('Telegram storage does not support file deletion via Bot API')
+    // 只能从本地索引中移除
+    const index = this._getLocalIndex()
+    const newIndex = index.filter(item => item.key !== key)
+    this._saveLocalIndex(newIndex)
+    console.warn('Telegram storage: removed from local index only (Bot API does not support deletion)')
     return Promise.resolve()
   }
 
   /**
    * 获取文件列表
-   * 注意：Telegram Bot API 不支持列出所有文件
-   * 这里仅作占位，返回空数组
+   * 从本地索引中读取
    */
   async listObjects(prefix = '') {
-    // Telegram Bot API 不支持列出所有已发送的文件
-    console.warn('Telegram storage does not support listing all files')
-    return []
+    const index = this._getLocalIndex()
+    
+    // 如果有前缀，过滤匹配的文件
+    const filtered = prefix 
+      ? index.filter(item => item.key.startsWith(prefix))
+      : index
+    
+    // 按时间降序排序
+    return filtered
+      .sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified))
+      .map(item => ({
+        key: item.key,
+        url: item.url,
+        lastModified: new Date(item.lastModified),
+        size: item.size
+      }))
   }
 
   /**
