@@ -139,15 +139,9 @@ export const STORAGE_SERVICES = {
       },
       {
         key: 'proxyUrl',
-        label: 'API代理域名',
+        label: '代理域名',
         icon: 'Link',
-        placeholder: '可选：API请求代理，如 api.telegram.org 的反代'
-      },
-      {
-        key: 'customDomain',
-        label: '自定义访问域名',
-        icon: 'View',
-        placeholder: '可选：图片展示用的域名，如 tg.yourdomain.com'
+        placeholder: '可选：自定义代理域名，如 api.telegram.org 的反代'
       }
     ]
   }
