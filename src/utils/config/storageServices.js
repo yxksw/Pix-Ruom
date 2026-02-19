@@ -116,6 +116,34 @@ export const STORAGE_SERVICES = {
         placeholder: 'SecretKey'
       }
     ]
+  },
+  'telegram': {
+    type: 'telegram',
+    label: 'Telegram',
+    icon: 'ChatDotRound',
+    description: '使用 Telegram Bot 作为存储后端',
+    fields: [
+      {
+        key: 'botToken',
+        label: 'Bot Token',
+        icon: 'Key',
+        required: true,
+        placeholder: '从 @BotFather 获取的 Bot Token'
+      },
+      {
+        key: 'chatId',
+        label: 'Chat ID',
+        icon: 'ChatDotSquare',
+        required: true,
+        placeholder: '频道或群组 ID，如：-1001234567890'
+      },
+      {
+        key: 'proxyUrl',
+        label: '代理域名',
+        icon: 'Link',
+        placeholder: '可选：自定义代理域名，如 api.telegram.org 的反代'
+      }
+    ]
   }
 }
 

@@ -1,0 +1,3 @@
+[submodule "CloudFlare-ImgBed"]
+	path = CloudFlare-ImgBed
+	url = git@github.com-yxksw:yxksw/CloudFlare-ImgBed.git

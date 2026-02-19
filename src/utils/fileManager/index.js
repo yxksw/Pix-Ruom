@@ -5,12 +5,14 @@ import ImageCompressor from '../imageCompressor'
 import { S3Storage } from '../storage/S3Storage'
 import { OSSStorage } from '../storage/OSSStorage'
 import { COSStorage } from '../storage/COSStorage'
+import { TelegramStorage } from '../storage/TelegramStorage'
 
 // 存储服务映射
 const STORAGE_CLASSES = {
   's3': S3Storage,
   'oss': OSSStorage,
-  'cos': COSStorage
+  'cos': COSStorage,
+  'telegram': TelegramStorage
 }
 
 /**
